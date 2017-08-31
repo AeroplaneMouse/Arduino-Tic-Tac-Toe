@@ -4,7 +4,10 @@ int lastState[] = {0, 0, 0, 0, 0};
 int curPos[] = {1, 1};
 int player = 1;
 int winnerPlayer = 0;
-
+int pot = 50;
+int input = 0;
+bool blinkOn = false;
+int test = 0;
 // Counters
 int counter = 0;
 unsigned long blinkCounter = 0;
@@ -23,6 +26,7 @@ void setup() {
   pinMode(A2, INPUT_PULLUP);
   pinMode(A3, INPUT_PULLUP);
   pinMode(A4, INPUT_PULLUP);
+  pinMode(A5, INPUT);
   
   board[0][0] = 0;
   board[1][0] = 0;
@@ -34,15 +38,15 @@ void setup() {
   board[1][2] = 0;
   board[2][2] = 0;
   
-  screen[0][0] = 0;
-  screen[1][0] = 0;
-  screen[2][0] = 0;
-  screen[0][1] = 0;
-  screen[1][1] = 0;
-  screen[2][1] = 0;
-  screen[0][2] = 0;
-  screen[1][2] = 0;
-  screen[2][2] = 0;
+  screen[0][0] = 1;
+  screen[1][0] = 1;
+  screen[2][0] = 1;
+  screen[0][1] = 1;
+  screen[1][1] = 1;
+  screen[2][1] = 1;
+  screen[0][2] = 1;
+  screen[1][2] = 1;
+  screen[2][2] = 1;
   //Serial.begin(9600);
 }
 
@@ -50,37 +54,44 @@ void setup() {
 // Start *******************************************************************************************
 
 void loop() {
-    
-  // Checks if a button is pressed. Runnes 2 times every full screen update.
+
+  //if (counter == 1000) Serial.println(analogRead(A5));
+  // Checks if a button is pressed.
   int btn = 0;
   switch(counter) {
-    case 500:
-      btn = getPressedButton();
-      buttonAction(btn);
-      break;
-    case 1000:
+    case 0:
       btn = getPressedButton();
       buttonAction(btn);
       break;
   }
-  
-  switch (blinkCounter) {
-    case 50000:
-      curBlink(true);
-      //Serial.println("ON");
-      break;
-    case 100000:
-      curBlink(false);
-      //Serial.println("OFF");
-      blinkCounter = 0;
-      break;
+
+  if (blinkOn) {
+    switch (blinkCounter) {
+      case 50000:
+        curBlink(true);
+        //Serial.println("ON");
+        break;
+      case 100000:
+        curBlink(false);
+        //Serial.println("OFF");
+        blinkCounter = 0;
+        break;
+    } 
   }
   
   // Updates the board/screen.
   // 666
   //1332
   //1998
+  
+  
+  
   switch(counter){
+    case 0:
+      input = analogRead(A5);
+      if (input > 1000) pot = 100;
+      else pot = input/10;
+      break;
     case 666:
       newDraw(1);
       break;
@@ -89,9 +100,14 @@ void loop() {
       break;
     case 1998:
       newDraw(3);
-      counter = 0;
+      counter = -1;
       break;
   }
+
+  test = (pot * 664)/100;
+  if (counter == (665 - test)) newDraw(4);
+  else if (counter == (1331 - test)) newDraw(4);
+  else if (counter == (1997 - test)) newDraw(4);
   
   counter++;
   blinkCounter++;
